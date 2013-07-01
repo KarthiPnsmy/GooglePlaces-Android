@@ -2,10 +2,13 @@ package com.titutorial.mapdemo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -16,6 +19,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
@@ -41,6 +45,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MainActivity extends FragmentActivity implements OnClickListener,OnSeekBarChangeListener {
 	static final LatLng NAMAKKAL = new LatLng(11.21951, 78.167799);
 	static final LatLng KPALAYAM = new LatLng(11.2818, 78.1648);
+	private static final int earthRadius = 6371;
 	Button typesValue;
 	Button currentLocation;
 	GPSTracker gps;
@@ -50,6 +55,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	public int radiusValue = 5;
 	StringBuilder stringBuilder;
 	ListView lv;
+	Boolean useCurrentLocation = false;
+	String searchBarValue = "";
 	
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
@@ -72,12 +79,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	ArrayList<Place> findPlaces;
 	
 	// ListItems data
-	ArrayList<HashMap<String, String>> placesListItems = new ArrayList<HashMap<String,String>>();
+	ArrayList<HashMap<String, String>> placesListItems;
 	
 	// KEY Strings
 	public static String KEY_REFERENCE = "reference"; // id of the place
 	public static String KEY_NAME = "name"; // name of the place
-	public static String KEY_VICINITY = "vicinity"; // Place area name
+	public static String KEY_ADDRESS = "formatted_address"; // Place area name
 	
 	protected Button selectColoursButton;
 	protected CharSequence[] placeTypes = { "ATM", "Bank", "Bus Station",
@@ -123,10 +130,13 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							}
 							
 							Log.d("search",	"search btn clikec - "+ searchBar.getText());
-							
+							useCurrentLocation = false;
+							searchBarValue = searchBar.getText().toString();
 							new LoadPlaces().execute();
 							
-							//return true;
+							//hide keyboard
+							hideKeyboard();
+							
 						}
 						return false;
 					}
@@ -166,7 +176,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 
 				double latitude = gps.getLatitude();
 				double longitude = gps.getLongitude();
-
+				useCurrentLocation = true;
+				//call search function
+				new LoadPlaces().execute();
+				hideKeyboard();
 				// \n is for new line
 				Toast.makeText(
 						getApplicationContext(),
@@ -266,7 +279,25 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		// TODO Auto-generated method stub
 		Log.d("seek",  "onStopTrackingTouch Seekbar");
 	}
-	
+
+	public void hideKeyboard() {
+	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+	    imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
+	}
+
+    public static float calculateDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+    	
+        float dLat = (float) Math.toRadians(lat2 - lat1);
+        float dLon = (float) Math.toRadians(lon2 - lon1);
+        float a =
+                (float) (Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1))
+                        * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2));
+        float c = (float) (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        float d = earthRadius * c;
+        return d;
+    }
+    
 	/**
 	 * Background Async Task to Load Google places
 	 * */
@@ -279,7 +310,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		protected void onPreExecute() {
 			super.onPreExecute();
 			pDialog = new ProgressDialog(MainActivity.this);
-			pDialog.setMessage(Html.fromHtml("<b>Search</b><br/>Loading Places..."));
+			pDialog.setMessage("Fetching places...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(false);
 			pDialog.show();
@@ -300,19 +331,28 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 				// Check list of types supported by google
 				// 
 				//String types = "cafe|restaurant"; // Listing places only cafes, restaurants
-				String types = stringBuilder.toString();
+				String types;
+				if(stringBuilder == null){
+					types = "";
+				}else{
+					types = stringBuilder.toString();
+				}
+				
 				// Radius in meters - increase this value if you don't find any places
 				//double radius = 1000; // 1000 meters
 				double radius = radiusValue*1000; // rdius in meters 
 				Log.d("search", "radius = "+radius);
-				Log.d("search", "types"+types);
-				types = types.replace(' ', '_');
-				types = types.replace(',', '|');
-				Log.d("search", "types"+types);
+				Log.d("search", "types1 "+types);
+				types = types.toLowerCase(Locale.ENGLISH);
+				Log.d("search", "types2 "+types);
+				types = types.replace(", ", "|");
+				Log.d("search", "types3 "+types);
+				types = types.replace(" ", "_");
+				Log.d("search", "types4 "+types);
 				Log.d("placs", "latitude - "+gps.getLatitude()+", longitude = "+gps.getLongitude());
 
 				 findPlaces = service.findPlaces(gps.getLatitude(), 
-						  gps.getLongitude(), types, radius);
+						  gps.getLongitude(), types, radius, useCurrentLocation, searchBarValue);
 						 
 						 
 						   for (int i = 0; i < findPlaces.size(); i++) {
@@ -344,7 +384,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 
 					if (findPlaces != null) {
 						// loop through each place
-						
+						 placesListItems = new ArrayList<HashMap<String,String>>();
 						   for (int i = 0; i < findPlaces.size(); i++) {
 							    HashMap<String, String> map = new HashMap<String, String>(); 
 							    Place placeDetail = findPlaces.get(i);
@@ -355,8 +395,23 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								// Place name
 								map.put(KEY_NAME,placeDetail.getName());
 
+								double distance = 0;
+								if(useCurrentLocation == true){
+									Location locationA = new Location("LocA");
+									locationA.setLatitude(gps.getLatitude());
+									locationA.setLongitude(gps.getLongitude());
+
+									Location locationB = new Location("LocB");
+									locationB.setLatitude(placeDetail.getLatitude());
+									locationB.setLongitude(placeDetail.getLongitude());
+
+									distance = locationA.distanceTo(locationB);
+								}else{
+									Log.d("Distance", "no distance calculation ");
+								}
+								
 								// Place address
-								map.put(KEY_VICINITY,placeDetail.getVicinity());
+								map.put(KEY_ADDRESS,placeDetail.getAddress()+", distance = "+calculateDistance(gps.getLatitude(),gps.getLongitude(),placeDetail.getLatitude(),placeDetail.getLongitude() ));
 								
 								// adding HashMap to ArrayList
 								placesListItems.add(map);
@@ -367,7 +422,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							// list adapter
 							ListAdapter adapter = new SimpleAdapter(MainActivity.this, placesListItems,
 					                R.layout.list_item,
-					                new String[] { KEY_REFERENCE, KEY_NAME, KEY_VICINITY}, new int[] {
+					                new String[] { KEY_REFERENCE, KEY_NAME, KEY_ADDRESS}, new int[] {
 					                        R.id.reference, R.id.name, R.id.address });
 							
 							// Adding data into listview

@@ -2,8 +2,10 @@ package com.titutorial.mapdemo;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,9 +29,9 @@ public class PlacesService {
 	 }
 	 
 	 public ArrayList<Place> findPlaces(double latitude, double longitude,
-	   String placeSpacification, Double radius) {
+	   String placeSpacification, Double radius, Boolean useCurrentLocation, String searchBarValue) {
 	 
-	  String urlString = makeUrl(latitude, longitude, placeSpacification, radius);
+	  String urlString = makeUrl(latitude, longitude, placeSpacification, radius, useCurrentLocation, searchBarValue);
 	 
 	  try {
 	   String json = getJSON(urlString);
@@ -57,30 +59,40 @@ public class PlacesService {
 	 }
 	 
 	 // https://maps.googleapis.com/maps/api/place/search/json?location=28.632808,77.218276&radius=500&types=atm&sensor=false&key=apikey
-	 private String makeUrl(double latitude, double longitude, String place, Double radius) {
-	  StringBuilder urlString = new StringBuilder(
-	    "https://maps.googleapis.com/maps/api/place/search/json?");
+	 private String makeUrl(double latitude, double longitude, String place, Double radius, Boolean useCurrentLocation, String searchBarValue) {
+	  StringBuilder urlString;
+	  
+	  Log.d("url", "useCurrentLocation = "+useCurrentLocation);
 	 
-	  if (place.equals("")) {
-	   urlString.append("&location=");
-	   urlString.append(Double.toString(latitude));
-	   urlString.append(",");
-	   urlString.append("&radius=");
-	   urlString.append(Double.toString(radius));
-	   //urlString.append("&radius=1000");
-	   //urlString.append("&types="+place);
-	   urlString.append("&sensor=false&key=" + API_KEY);
-	  } else {
-	   urlString.append("&location=");
-	   urlString.append(Double.toString(latitude));
-	   urlString.append(",");
-	   urlString.append(Double.toString(longitude));
-	   urlString.append("&radius=");
-	   urlString.append(Double.toString(radius));
-	   //urlString.append("&radius=1000");
-	   urlString.append("&types=" + place);
-	   urlString.append("&sensor=false&key=" + API_KEY);
-	  }
+		if (useCurrentLocation == false) {
+			urlString = new StringBuilder(
+					"https://maps.googleapis.com/maps/api/place/textsearch/json?");
+			urlString.append("query=");
+			try {
+				urlString.append(java.net.URLEncoder.encode(searchBarValue,
+						"utf-8"));
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			urlString.append("&radius=");
+			urlString.append(Double.toString(radius));
+			urlString.append("&types=" + place);
+			urlString.append("&sensor=false&key=" + API_KEY);
+		} else {
+			urlString = new StringBuilder(
+					"https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+			urlString.append("location=");
+			urlString.append(Double.toString(latitude));
+			urlString.append(",");
+			urlString.append(Double.toString(longitude));
+			urlString.append("&radius=");
+			urlString.append(Double.toString(radius));
+			// urlString.append("&radius=1000");
+			urlString.append("&types=" + place);
+			//urlString.append("&rankby=distance");
+			urlString.append("&sensor=false&key=" + API_KEY);
+		}
 	  Log.d("urlString ", "urlString = "+urlString);
 	  return urlString.toString();
 	 }

@@ -1,5 +1,6 @@
 package com.titutorial.mapdemo;
 
+import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,7 +13,7 @@ public class Place {
     private String id;
     private String icon;
     private String name;
-    private String vicinity;
+    private String address;
     private Double latitude;
     private Double longitude;
  
@@ -46,11 +47,11 @@ public class Place {
     public void setName(String name) {
         this.name = name;
     }
-    public String getVicinity() {
-        return vicinity;
+    public String getAddress() {
+        return address;
     }
-    public void setVicinity(String vicinity) {
-        this.vicinity = vicinity;
+    public void setAddress(String address) {
+        this.address = address;
     }
  
     static Place jsonToPontoReferencia(JSONObject pontoReferencia) {
@@ -62,10 +63,18 @@ public class Place {
             result.setLongitude((Double) location.get("lng"));
             result.setIcon(pontoReferencia.getString("icon"));
             result.setName(pontoReferencia.getString("name"));
-            //Log.v("Place ", "before vicinity = " + pontoReferencia.getString("vicinity"));
-            result.setVicinity(pontoReferencia.getString("vicinity"));
+
+			try {
+				Log.v("tPlace1 ", "before address = " + pontoReferencia.getString("formatted_address"));
+				result.setAddress(pontoReferencia.getString("formatted_address"));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				Log.v("tPlace2 ", "before address = " + pontoReferencia.getString("vicinity"));
+				result.setAddress(pontoReferencia.getString("vicinity"));
+				//e.printStackTrace();
+			}
+            
             result.setId(pontoReferencia.getString("id"));
-            //Log.v("Place ", "after vicinity = " + result.getVicinity());
             Log.v("Place ", "result = " + result.toString());
             return result;
         } catch (JSONException ex) {
@@ -76,7 +85,7 @@ public class Place {
 	@Override
 	public String toString() {
 		return "Place [id=" + id + ", icon=" + icon + ", name=" + name
-				+ ", vicinity=" + vicinity + ", latitude=" + latitude
+				+ ", address=" + address + ", latitude=" + latitude
 				+ ", longitude=" + longitude + "]";
 	}
  
