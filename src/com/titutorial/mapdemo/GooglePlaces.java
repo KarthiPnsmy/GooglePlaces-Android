@@ -62,7 +62,8 @@ public class GooglePlaces {
 
 			PlacesList list = request.execute().parseAs(PlacesList.class);
 			// Check log cat for places response status
-			Log.d("Places Status", "" + list.status);
+			Log.d("Places Status", "list " + list.status);
+			Log.d("Places Status", "status " + list.status);
 			return list;
 
 		} catch (HttpResponseException e) {

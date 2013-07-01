@@ -101,6 +101,7 @@ public class GPSTracker extends Service implements LocationListener {
             }
  
         } catch (Exception e) {
+        	 Log.d("Execption ", "GPS Initializatioon");
             e.printStackTrace();
         }
  

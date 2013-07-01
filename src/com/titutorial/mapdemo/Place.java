@@ -1,57 +1,83 @@
 package com.titutorial.mapdemo;
 
-import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.google.api.client.util.Key;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/** Implement this class from "Serializable"
-* So that you can pass this class Object to another using Intents
-* Otherwise you can't pass to another actitivy
-* */
-public class Place implements Serializable {
+import android.util.Log;
 
-	@Key
-	public String id;
-	
-	@Key
-	public String name;
-	
-	@Key
-	public String reference;
-	
-	@Key
-	public String icon;
-	
-	@Key
-	public String vicinity;
-	
-	@Key
-	public Geometry geometry;
-	
-	@Key
-	public String formatted_address;
-	
-	@Key
-	public String formatted_phone_number;
-
+public class Place {
+    private String id;
+    private String icon;
+    private String name;
+    private String vicinity;
+    private Double latitude;
+    private Double longitude;
+ 
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public String getIcon() {
+        return icon;
+    }
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+    public Double getLatitude() {
+        return latitude;
+    }
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+    public Double getLongitude() {
+        return longitude;
+    }
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getVicinity() {
+        return vicinity;
+    }
+    public void setVicinity(String vicinity) {
+        this.vicinity = vicinity;
+    }
+ 
+    static Place jsonToPontoReferencia(JSONObject pontoReferencia) {
+        try {
+            Place result = new Place();
+            JSONObject geometry = (JSONObject) pontoReferencia.get("geometry");
+            JSONObject location = (JSONObject) geometry.get("location");
+            result.setLatitude((Double) location.get("lat"));
+            result.setLongitude((Double) location.get("lng"));
+            result.setIcon(pontoReferencia.getString("icon"));
+            result.setName(pontoReferencia.getString("name"));
+            //Log.v("Place ", "before vicinity = " + pontoReferencia.getString("vicinity"));
+            result.setVicinity(pontoReferencia.getString("vicinity"));
+            result.setId(pontoReferencia.getString("id"));
+            //Log.v("Place ", "after vicinity = " + result.getVicinity());
+            Log.v("Place ", "result = " + result.toString());
+            return result;
+        } catch (JSONException ex) {
+            Logger.getLogger(Place.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
 	@Override
 	public String toString() {
-		return name + " - " + id + " - " + reference;
+		return "Place [id=" + id + ", icon=" + icon + ", name=" + name
+				+ ", vicinity=" + vicinity + ", latitude=" + latitude
+				+ ", longitude=" + longitude + "]";
 	}
-	
-	public static class Geometry implements Serializable
-	{
-		@Key
-		public Location location;
-	}
-	
-	public static class Location implements Serializable
-	{
-		@Key
-		public double lat;
-		
-		@Key
-		public double lng;
-	}
-	
+ 
 }

@@ -19,6 +19,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SimpleAdapter;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -48,6 +49,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	TextView distanceLabel;
 	public int radiusValue = 5;
 	StringBuilder stringBuilder;
+	ListView lv;
 	
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
@@ -66,6 +68,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	
 	// Places List
 	PlacesList nearPlaces;
+	ArrayList<Place> placeList;
+	ArrayList<Place> findPlaces;
 	
 	// ListItems data
 	ArrayList<HashMap<String, String>> placesListItems = new ArrayList<HashMap<String,String>>();
@@ -79,6 +83,11 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	protected CharSequence[] placeTypes = { "ATM", "Bank", "Bus Station",
 			"Department Store", "Hospital", "Movie Theater", "Pharmacy",
 			"Restaurant" };
+	
+	protected CharSequence[] placeTypesValues = { "atm", "bank", "bus_station",
+			"department_store", "hospital", "movie_theater", "pharmacy",
+			"restaurant" };
+	
 	protected ArrayList<CharSequence> selectedTypes = new ArrayList<CharSequence>();
 
 	@Override
@@ -90,7 +99,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		typesValue = (Button) findViewById(R.id.typesValue);
 		distanceLabel = (TextView) findViewById(R.id.distanceLabel);
 		slider = (SeekBar) findViewById(R.id.distanceSlider);
+		lv = (ListView) findViewById(R.id.list);
 		
+		gps = new GPSTracker(MainActivity.this);
 		currentLocation.setOnClickListener(this);
 		typesValue.setOnClickListener(this);
 		slider.setOnSeekBarChangeListener(this);
@@ -278,6 +289,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		 * getting Places JSON
 		 * */
 		protected String doInBackground(String... args) {
+			
+			PlacesService service = new PlacesService("AIzaSyCRLa4LQZWNQBcjCYcIVYA45i9i8zfClqc");
 			// creating Places class object
 			googlePlaces = new GooglePlaces();
 			
@@ -286,15 +299,27 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 				// If you want all types places make it as null
 				// Check list of types supported by google
 				// 
-				String types = "cafe|restaurant"; // Listing places only cafes, restaurants
-				
+				//String types = "cafe|restaurant"; // Listing places only cafes, restaurants
+				String types = stringBuilder.toString();
 				// Radius in meters - increase this value if you don't find any places
-				double radius = radiusValue*1000; // 1000 meters 
+				//double radius = 1000; // 1000 meters
+				double radius = radiusValue*1000; // rdius in meters 
 				Log.d("search", "radius = "+radius);
-				// get nearest places
-				nearPlaces = googlePlaces.search(gps.getLatitude(),
-						gps.getLongitude(), radius, types);
-				
+				Log.d("search", "types"+types);
+				types = types.replace(' ', '_');
+				types = types.replace(',', '|');
+				Log.d("search", "types"+types);
+				Log.d("placs", "latitude - "+gps.getLatitude()+", longitude = "+gps.getLongitude());
+
+				 findPlaces = service.findPlaces(gps.getLatitude(), 
+						  gps.getLongitude(), types, radius);
+						 
+						 
+						   for (int i = 0; i < findPlaces.size(); i++) {
+						 
+						    Place placeDetail = findPlaces.get(i);
+						    Log.e("placesL", "places : " + placeDetail.getName());
+						   }				
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -312,12 +337,53 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 			// dismiss the dialog after getting all products
 			pDialog.dismiss();
 			// updating UI from Background Thread
+			
 			runOnUiThread(new Runnable() {
 				public void run() {
-					/**
-					 * Updating parsed Places into LISTVIEW
-					 * */
+					
+
+					if (findPlaces != null) {
+						// loop through each place
+						
+						   for (int i = 0; i < findPlaces.size(); i++) {
+							    HashMap<String, String> map = new HashMap<String, String>(); 
+							    Place placeDetail = findPlaces.get(i);
+							    Log.e("placesL", "places : " + placeDetail.getName());
+								// Place reference is used to get "place full details"
+								map.put(KEY_REFERENCE, placeDetail.getId());
+								
+								// Place name
+								map.put(KEY_NAME,placeDetail.getName());
+
+								// Place address
+								map.put(KEY_VICINITY,placeDetail.getVicinity());
+								
+								// adding HashMap to ArrayList
+								placesListItems.add(map);
+							}	
+						   
+							Log.d("Result", "placesListItems = "+placesListItems);
+							
+							// list adapter
+							ListAdapter adapter = new SimpleAdapter(MainActivity.this, placesListItems,
+					                R.layout.list_item,
+					                new String[] { KEY_REFERENCE, KEY_NAME, KEY_VICINITY}, new int[] {
+					                        R.id.reference, R.id.name, R.id.address });
+							
+							// Adding data into listview
+							lv.setAdapter(adapter);					   
+					}else{
+						Log.d("eee", "findPlaces is null");
+					}
+						   
+						
+
+					
+					
+					 // Updating parsed Places into LISTVIEW
 					// Get json response status
+					/*
+					Log.d("nearPlaces", "nearPlaces = "+nearPlaces.toString());
 					String status = nearPlaces.status;
 					
 					// Check for all possible status
@@ -342,7 +408,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							
 							Log.d("Result", "placesListItems = "+placesListItems);
 							
-							/*
 							// list adapter
 							ListAdapter adapter = new SimpleAdapter(MainActivity.this, placesListItems,
 					                R.layout.list_item,
@@ -351,7 +416,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							
 							// Adding data into listview
 							lv.setAdapter(adapter);
-							*/
 						}
 					}
 					else if(status.equals("ZERO_RESULTS")){
@@ -390,7 +454,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								"Sorry error occured.",
 								false);
 					}
+					*/
 				}
+				
 			});
 
 		}
