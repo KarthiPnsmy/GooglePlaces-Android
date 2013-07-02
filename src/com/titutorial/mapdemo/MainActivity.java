@@ -32,8 +32,6 @@ import android.widget.Toast;
 
 import com.titutorial.mapdemo.helper.AlertDialogManager;
 import com.titutorial.mapdemo.helper.ConnectionDetector;
-import com.titutorial.mapdemo.GooglePlaces;
-import com.titutorial.mapdemo.PlacesList;
 import com.titutorial.mapdemo.MainActivity.LoadPlaces;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -66,15 +64,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	
 	// Alert Dialog Manager
 	AlertDialogManager alert = new AlertDialogManager();
-
-	// Google Places
-	GooglePlaces googlePlaces;
 	
 	// Progress dialog
 	ProgressDialog pDialog;
-	
-	// Places List
-	PlacesList nearPlaces;
+
 	ArrayList<Place> placeList;
 	ArrayList<Place> findPlaces;
 	
@@ -85,6 +78,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	public static String KEY_REFERENCE = "reference"; // id of the place
 	public static String KEY_NAME = "name"; // name of the place
 	public static String KEY_ADDRESS = "formatted_address"; // Place area name
+	public static String KEY_DISTANCE = "distance"; // distance
+	public static String KEY_LATITUDE = "latitude"; // latitude
+	public static String KEY_LONGITUDE = "longitude"; // longitude
 	
 	protected Button selectColoursButton;
 	protected CharSequence[] placeTypes = { "ATM", "Bank", "Bus Station",
@@ -285,7 +281,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	    imm.hideSoftInputFromWindow(searchBar.getWindowToken(), 0);
 	}
 
-    public static float calculateDistance(double lat1, double lon1, double lat2, double lon2)
+    public static double calculateDistance(double lat1, double lon1, double lat2, double lon2)
     {
     	
         float dLat = (float) Math.toRadians(lat2 - lat1);
@@ -295,7 +291,11 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
                         * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2));
         float c = (float) (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
         float d = earthRadius * c;
-        return d;
+        
+        double finalValue = Math.round( d * 100.0 ) / 100.0;
+        Log.d("distance", "finalValue = "+finalValue+" KM");
+        
+        return finalValue;
     }
     
 	/**
@@ -322,8 +322,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		protected String doInBackground(String... args) {
 			
 			PlacesService service = new PlacesService("AIzaSyCRLa4LQZWNQBcjCYcIVYA45i9i8zfClqc");
-			// creating Places class object
-			googlePlaces = new GooglePlaces();
 			
 			try {
 				// Separeate your place types by PIPE symbol "|"
@@ -411,8 +409,13 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								}
 								
 								// Place address
-								map.put(KEY_ADDRESS,placeDetail.getAddress()+", distance = "+calculateDistance(gps.getLatitude(),gps.getLongitude(),placeDetail.getLatitude(),placeDetail.getLongitude() ));
-								
+								map.put(KEY_ADDRESS,placeDetail.getAddress());
+								// Place latitude
+								map.put(KEY_LATITUDE, placeDetail.getLatitude().toString());
+								// Place longitude
+								map.put(KEY_LONGITUDE, placeDetail.getLongitude().toString());
+								// Distance from current location
+								map.put(KEY_DISTANCE, calculateDistance(gps.getLatitude(),gps.getLongitude(),placeDetail.getLatitude(),placeDetail.getLongitude() )+" KM");
 								// adding HashMap to ArrayList
 								placesListItems.add(map);
 							}	
@@ -420,96 +423,21 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							Log.d("Result", "placesListItems = "+placesListItems);
 							
 							// list adapter
+							/*
 							ListAdapter adapter = new SimpleAdapter(MainActivity.this, placesListItems,
 					                R.layout.list_item,
 					                new String[] { KEY_REFERENCE, KEY_NAME, KEY_ADDRESS}, new int[] {
 					                        R.id.reference, R.id.name, R.id.address });
+							*/
+							LazyAdapter adapter = new LazyAdapter(getApplicationContext(), lv,
+									MainActivity.this, placesListItems);
 							
 							// Adding data into listview
 							lv.setAdapter(adapter);					   
 					}else{
-						Log.d("eee", "findPlaces is null");
+						Log.d("error", "findPlaces is null");
 					}
 						   
-						
-
-					
-					
-					 // Updating parsed Places into LISTVIEW
-					// Get json response status
-					/*
-					Log.d("nearPlaces", "nearPlaces = "+nearPlaces.toString());
-					String status = nearPlaces.status;
-					
-					// Check for all possible status
-					if(status.equals("OK")){
-						// Successfully got places details
-						if (nearPlaces.results != null) {
-							// loop through each place
-							for (Place p : nearPlaces.results) {
-								HashMap<String, String> map = new HashMap<String, String>();
-								
-								// Place reference won't display in listview - it will be hidden
-								// Place reference is used to get "place full details"
-								map.put(KEY_REFERENCE, p.reference);
-								
-								// Place name
-								map.put(KEY_NAME, p.name);
-								
-								
-								// adding HashMap to ArrayList
-								placesListItems.add(map);
-							}
-							
-							Log.d("Result", "placesListItems = "+placesListItems);
-							
-							// list adapter
-							ListAdapter adapter = new SimpleAdapter(MainActivity.this, placesListItems,
-					                R.layout.list_item,
-					                new String[] { KEY_REFERENCE, KEY_NAME}, new int[] {
-					                        R.id.reference, R.id.name });
-							
-							// Adding data into listview
-							lv.setAdapter(adapter);
-						}
-					}
-					else if(status.equals("ZERO_RESULTS")){
-						// Zero results found
-						alert.showAlertDialog(MainActivity.this, "Near Places",
-								"Sorry no places found. Try to change the types of places",
-								false);
-					}
-					else if(status.equals("UNKNOWN_ERROR"))
-					{
-						alert.showAlertDialog(MainActivity.this, "Places Error",
-								"Sorry unknown error occured.",
-								false);
-					}
-					else if(status.equals("OVER_QUERY_LIMIT"))
-					{
-						alert.showAlertDialog(MainActivity.this, "Places Error",
-								"Sorry query limit to google places is reached",
-								false);
-					}
-					else if(status.equals("REQUEST_DENIED"))
-					{
-						alert.showAlertDialog(MainActivity.this, "Places Error",
-								"Sorry error occured. Request is denied",
-								false);
-					}
-					else if(status.equals("INVALID_REQUEST"))
-					{
-						alert.showAlertDialog(MainActivity.this, "Places Error",
-								"Sorry error occured. Invalid Request",
-								false);
-					}
-					else
-					{
-						alert.showAlertDialog(MainActivity.this, "Places Error",
-								"Sorry error occured.",
-								false);
-					}
-					*/
 				}
 				
 			});

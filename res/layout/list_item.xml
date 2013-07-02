@@ -1,29 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-    
-    <TextView android:id="@+id/reference"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="5dip" >
+
+     <TextView android:id="@+id/reference"
         android:visibility="gone"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"/>
-    
-    <TextView android:id="@+id/name"
+     <TextView android:id="@+id/itemLat"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+      <TextView android:id="@+id/itemLong"
+        android:visibility="gone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>  
+   
+	<!-- Place Name-->
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="75dip"
+        android:text="Place Name"
+        android:textColor="#040404"
+        android:typeface="sans" 
+        android:textSize="15dip"
+        android:textStyle="bold"/>
+
+	<!-- Place Address -->
+    <TextView
+        android:id="@+id/address"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
-        android:paddingTop="10dip"
-        android:textStyle="bold"
-        android:textSize="16dip"/>
-    
-     <TextView android:id="@+id/address"
-        android:layout_width="fill_parent"
+        android:layout_below="@id/name"
+        android:textColor="#343434"
+        android:textSize="14dip"
+        android:layout_marginTop="5dip"
+        android:layout_marginRight="75dip"
+        android:text="" />
+
+	<!--  Distance -->
+    <TextView
+        android:id="@+id/distance"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
-        android:paddingBottom="10dip"
-        android:paddingTop="5dip"
-        android:textSize="16dip"/>
-</LinearLayout>
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@id/name"
+        android:gravity="right"
+        android:text=""
+        android:layout_marginRight="5dip"
+        android:textSize="10dip"
+        android:textColor="#585858"
+        android:textStyle="bold"/>
+      
+     <!-- direction btn -->    
+     <ImageView android:layout_width="wrap_content"
+        android:id="@+id/direction"
+        android:layout_marginRight="10dip"
+         android:layout_marginTop="40dip"
+     	android:layout_height="wrap_content"
+     	android:src="@drawable/direction_btn"
+     	android:layout_alignParentRight="true"
+     	android:layout_centerVertical="true"/>
+
+</RelativeLayout>
