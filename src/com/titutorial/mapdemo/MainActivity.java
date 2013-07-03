@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -41,8 +43,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends FragmentActivity implements OnClickListener,OnSeekBarChangeListener {
-	static final LatLng NAMAKKAL = new LatLng(11.21951, 78.167799);
-	static final LatLng KPALAYAM = new LatLng(11.2818, 78.1648);
 	private static final int earthRadius = 6371;
 	Button typesValue;
 	Button currentLocation;
@@ -137,29 +137,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 						return false;
 					}
 		});
-
-
-
-
-
-		/*
-		 * 
-		 * GoogleMap map = ((SupportMapFragment) getSupportFragmentManager()
-		 * .findFragmentById(R.id.map)).getMap();
-		 * 
-		 * map.setMyLocationEnabled(true); map.addMarker(new
-		 * MarkerOptions().position(NAMAKKAL) .title("Namakkal")
-		 * .snippet("Transport city")); map.addMarker(new MarkerOptions()
-		 * .position(KPALAYAM) .title("K.Palayam") .snippet("Coolest place")
-		 * .icon(BitmapDescriptorFactory
-		 * .fromResource(R.drawable.ic_launcher)));
-		 * 
-		 * // Move the camera instantly to NAMAKKAL with a zoom of 15.
-		 * map.moveCamera(CameraUpdateFactory.newLatLngZoom(NAMAKKAL, 15));
-		 * 
-		 * // Zoom in, animating the camera.
-		 * map.animateCamera(CameraUpdateFactory.zoomTo(12), 2000, null);
-		 */
 	}
 
 	@Override
@@ -204,6 +181,24 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		return true;
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+		case R.id.map_view:
+			//do something when this button is pressed
+			Log.d("menu", "map_view clicked");
+			Intent i = new Intent(this, MapActivity.class);
+			//i.putParcelableArrayListExtra("stock_list", placesListItems);
+			i.putExtra("stock_list", "hii");
+			startActivity(i);
+			return true;
+
+		default: 
+			return true;
+		}	
+	}
+	
 	protected void onChangeSelectedTypes() {
 		stringBuilder = new StringBuilder();
 
@@ -423,12 +418,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							Log.d("Result", "placesListItems = "+placesListItems);
 							
 							// list adapter
-							/*
-							ListAdapter adapter = new SimpleAdapter(MainActivity.this, placesListItems,
-					                R.layout.list_item,
-					                new String[] { KEY_REFERENCE, KEY_NAME, KEY_ADDRESS}, new int[] {
-					                        R.id.reference, R.id.name, R.id.address });
-							*/
 							LazyAdapter adapter = new LazyAdapter(getApplicationContext(), lv,
 									MainActivity.this, placesListItems);
 							

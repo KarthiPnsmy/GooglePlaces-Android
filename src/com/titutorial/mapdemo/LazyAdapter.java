@@ -95,19 +95,13 @@ public class LazyAdapter extends BaseAdapter {
 
 					double sLat = gps.getLatitude();
 					double sLong = gps.getLongitude();
-					Toast.makeText(
-							context,
-							"Your Location is - \nLat: " + sLat + "\nLong: "
-									+ sLong, Toast.LENGTH_LONG).show();
-					
-
-					
 					String dLat = currentPlace.get(MainActivity.KEY_LATITUDE);
 					String dLong = currentPlace.get(MainActivity.KEY_LONGITUDE);
 					Log.d("currentPlace", "dLat = "+dLat+", dLong = "+dLong);
-					
+					String iUrl = "http://maps.google.com/maps?saddr="+sLat+","+sLong+"&daddr="+dLat+","+dLong;
+					Log.d("currentPlace", "iUrl = "+iUrl);
 					Intent intent = new Intent(android.content.Intent.ACTION_VIEW, 
-						    Uri.parse("http://maps.google.com/maps?saddr="+sLat+","+sLong+"&daddr="+dLat+","+dLong)).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						    Uri.parse(iUrl)).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 					context.startActivity(intent);
 				} else {
 					// can't get location
@@ -116,22 +110,6 @@ public class LazyAdapter extends BaseAdapter {
 					Log.d("currentPlace", "can't get location");
 					gps.showSettingsAlert();
 				}
-				
-/*
-				if (currentUser.get(DatabaseHandler.KEY_ID) != null) {
-					Toast.makeText(
-							activity,
-							"Edit Image Clicked position = " + position
-									+ ", User Id = "
-									+ currentUser.get(DatabaseHandler.KEY_ID),
-							Toast.LENGTH_SHORT).show();
-
-					Intent i = new Intent(context, AddAddress.class).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);;
-					i.putExtra("type", "edit");
-					i.putExtra("userId", currentUser.get(DatabaseHandler.KEY_ID));
-					context.startActivity(i);
-				}
-*/
 			}
 		});
 		

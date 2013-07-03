@@ -43,6 +43,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.titutorial.mapdemo.MapActivity"
+            android:label="Map" >
+        </activity>
         <!-- Mac -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
