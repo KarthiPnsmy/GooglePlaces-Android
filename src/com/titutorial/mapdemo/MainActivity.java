@@ -188,9 +188,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		case R.id.map_view:
 			//do something when this button is pressed
 			Log.d("menu", "map_view clicked");
+			Log.d("menu", "placesListItems = "+placesListItems);
 			Intent i = new Intent(this, MapActivity.class);
-			//i.putParcelableArrayListExtra("stock_list", placesListItems);
-			i.putExtra("stock_list", "hii");
+			i.putExtra("placeList", placesListItems);
 			startActivity(i);
 			return true;
 
