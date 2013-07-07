@@ -77,19 +77,15 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	// KEY Strings
 	public static String KEY_REFERENCE = "reference"; // id of the place
 	public static String KEY_NAME = "name"; // name of the place
+	public static String KEY_RATING = "rating"; // rating of the place
 	public static String KEY_ADDRESS = "formatted_address"; // Place area name
 	public static String KEY_DISTANCE = "distance"; // distance
 	public static String KEY_LATITUDE = "latitude"; // latitude
 	public static String KEY_LONGITUDE = "longitude"; // longitude
 	
-	protected Button selectColoursButton;
 	protected CharSequence[] placeTypes = { "ATM", "Bank", "Bus Station",
 			"Department Store", "Hospital", "Movie Theater", "Pharmacy",
 			"Restaurant" };
-	
-	protected CharSequence[] placeTypesValues = { "atm", "bank", "bus_station",
-			"department_store", "hospital", "movie_theater", "pharmacy",
-			"restaurant" };
 	
 	protected ArrayList<CharSequence> selectedTypes = new ArrayList<CharSequence>();
 
@@ -188,6 +184,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		case R.id.map_view:
 			//do something when this button is pressed
 			Log.d("menu", "map_view clicked");
+			if(placesListItems == null){
+				Toast.makeText(this, "Place list empty!", Toast.LENGTH_SHORT).show();
+				return false;
+			}
 			Log.d("menu", "placesListItems = "+placesListItems);
 			Intent i = new Intent(this, MapActivity.class);
 			i.putExtra("placeList", placesListItems);
@@ -210,8 +210,13 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 			}
 
 		}
-
-		typesValue.setText(stringBuilder.toString());
+		
+		if(stringBuilder.toString() == "" || stringBuilder.toString() == null){
+			typesValue.setText("None");
+		}else{
+			typesValue.setText(stringBuilder.toString());
+		}
+		
 	}
 
 	protected void showSelectColoursDialog() {
@@ -388,6 +393,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								// Place name
 								map.put(KEY_NAME,placeDetail.getName());
 
+								// Place rating
+								map.put(KEY_RATING,placeDetail.getRating());
+								
 								double distance = 0;
 								if(useCurrentLocation == true){
 									Location locationA = new Location("LocA");

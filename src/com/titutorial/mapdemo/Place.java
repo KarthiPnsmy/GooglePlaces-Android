@@ -13,6 +13,7 @@ public class Place {
     private String id;
     private String icon;
     private String name;
+    private String rating;
     private String address;
     private Double latitude;
     private Double longitude;
@@ -50,6 +51,14 @@ public class Place {
     public String getAddress() {
         return address;
     }
+
+	public String getRating() {
+		return rating;
+	}
+	public void setRating(String rating) {
+		this.rating = rating;
+	}
+	
     public void setAddress(String address) {
         this.address = address;
     }
@@ -63,6 +72,13 @@ public class Place {
             result.setLongitude((Double) location.get("lng"));
             result.setIcon(pontoReferencia.getString("icon"));
             result.setName(pontoReferencia.getString("name"));
+            
+            try{
+            	 result.setRating(pontoReferencia.getString("rating"));
+            }catch(JSONException e){
+            	Log.d("rating", "rating tag not found for "+pontoReferencia.getString("name"));
+            }
+           
 
 			try {
 				Log.v("tPlace1 ", "before address = " + pontoReferencia.getString("formatted_address"));
@@ -84,7 +100,7 @@ public class Place {
     }
 	@Override
 	public String toString() {
-		return "Place [id=" + id + ", icon=" + icon + ", name=" + name
+		return "Place [id=" + id + ", icon=" + icon + ", name=" + name + ", rating=" + rating
 				+ ", address=" + address + ", latitude=" + latitude
 				+ ", longitude=" + longitude + "]";
 	}

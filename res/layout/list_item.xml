@@ -27,21 +27,35 @@
         android:text="Place Name"
         android:textColor="#040404"
         android:typeface="sans" 
-        android:textSize="15dip"
+        android:textSize="15sp"
         android:textStyle="bold"/>
 
 	<!-- Place Address -->
     <TextView
         android:id="@+id/address"
+        android:text="Place Address"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/name"
         android:textColor="#343434"
-        android:textSize="14dip"
+        android:textSize="14sp"
         android:layout_marginTop="5dip"
-        android:layout_marginRight="75dip"
-        android:text="" />
-
+        android:layout_marginRight="75dip"/>
+	
+    <!-- Place rating -->
+	<RatingBar 
+	    android:layout_below="@id/address"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	   	android:layout_marginTop="5dp"
+	    android:isIndicator="true"
+	    android:numStars="5"
+	    android:stepSize="1"
+	    android:rating="1"
+	    android:id="@+id/place_ratingbar"
+	    style="?android:attr/ratingBarStyleSmall"
+	/>    
+    
 	<!--  Distance -->
     <TextView
         android:id="@+id/distance"
@@ -51,8 +65,9 @@
         android:layout_alignTop="@id/name"
         android:gravity="right"
         android:text=""
-        android:layout_marginRight="5dip"
-        android:textSize="10dip"
+        android:layout_marginRight="8dip"
+        android:layout_marginTop="3dp"
+        android:textSize="10sp"
         android:textColor="#585858"
         android:textStyle="bold"/>
       
@@ -60,7 +75,7 @@
      <ImageView android:layout_width="wrap_content"
         android:id="@+id/direction"
         android:layout_marginRight="10dip"
-         android:layout_marginTop="40dip"
+         android:layout_marginTop="50dip"
      	android:layout_height="wrap_content"
      	android:src="@drawable/direction_btn"
      	android:layout_alignParentRight="true"

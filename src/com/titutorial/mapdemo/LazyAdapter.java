@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class LazyAdapter extends BaseAdapter {
 
 		TextView placeReference = (TextView) vi.findViewById(R.id.reference); // reference
 		TextView placeName = (TextView) vi.findViewById(R.id.name); // name
+		RatingBar  placeRatingBar = (RatingBar) vi.findViewById(R.id.place_ratingbar); // rating bar
 		TextView placeAddress = (TextView) vi.findViewById(R.id.address); // address
 		TextView distance = (TextView) vi.findViewById(R.id.distance); // distance
 		TextView placeLatitude = (TextView) vi.findViewById(R.id.itemLat); // lat
@@ -73,6 +75,14 @@ public class LazyAdapter extends BaseAdapter {
 		// Setting all values in listview
 		placeReference.setText(place.get(MainActivity.KEY_REFERENCE));
 		placeName.setText(place.get(MainActivity.KEY_NAME));
+		if(place.get(MainActivity.KEY_RATING) != null){
+			placeRatingBar.setRating(Float.parseFloat(place.get(MainActivity.KEY_RATING)));
+		}else{
+			Log.d("rating", "rating null for "+place.get(MainActivity.KEY_NAME));
+			placeRatingBar.setVisibility(View.GONE);
+		}
+		
+		
 		placeAddress.setText(place.get(MainActivity.KEY_ADDRESS));
 		placeLatitude.setText(place.get(MainActivity.KEY_LATITUDE));
 		placeLongitude.setText(place.get(MainActivity.KEY_LONGITUDE));

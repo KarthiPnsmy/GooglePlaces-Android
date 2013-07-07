@@ -9,8 +9,8 @@ package com.google.android.gms;
 public final class R {
 	public static final class id {
 		public static final int terrain = 0x7f050003;
-		public static final int none = 0x7f050000;
 		public static final int satellite = 0x7f050002;
+		public static final int none = 0x7f050000;
 		public static final int hybrid = 0x7f050004;
 		public static final int normal = 0x7f050001;
 	}
@@ -54,14 +54,14 @@ public final class R {
 	public static final class styleable {
 		public static final int MapAttrs_uiCompass = 6;
 		public static final int MapAttrs_uiScrollGestures = 8;
-		public static final int MapAttrs_mapType = 0;
 		public static final int MapAttrs_cameraZoom = 5;
+		public static final int MapAttrs_mapType = 0;
 		public static final int MapAttrs_cameraBearing = 1;
 		public static final int MapAttrs_uiZoomControls = 10;
 		public static final int MapAttrs_zOrderOnTop = 13;
 		public static final int[] MapAttrs = { 0x7f010000, 0x7f010001, 0x7f010002, 0x7f010003, 0x7f010004, 0x7f010005, 0x7f010006, 0x7f010007, 0x7f010008, 0x7f010009, 0x7f01000a, 0x7f01000b, 0x7f01000c, 0x7f01000d };
-		public static final int MapAttrs_cameraTargetLat = 2;
 		public static final int MapAttrs_cameraTargetLng = 3;
+		public static final int MapAttrs_cameraTargetLat = 2;
 		public static final int MapAttrs_uiTiltGestures = 9;
 		public static final int MapAttrs_cameraTilt = 4;
 		public static final int MapAttrs_uiRotateGestures = 7;
@@ -73,15 +73,15 @@ public final class R {
 		public static final int common_signin_btn_text_disabled_dark = 0x7f02000f;
 		public static final int common_signin_btn_icon_pressed_light = 0x7f02000d;
 		public static final int common_signin_btn_text_disabled_focus_light = 0x7f020011;
-		public static final int common_signin_btn_icon_focus_light = 0x7f020008;
 		public static final int common_signin_btn_icon_disabled_focus_light = 0x7f020005;
+		public static final int common_signin_btn_icon_focus_light = 0x7f020008;
 		public static final int common_signin_btn_icon_dark = 0x7f020002;
 		public static final int common_signin_btn_icon_normal_dark = 0x7f02000a;
 		public static final int common_signin_btn_icon_disabled_light = 0x7f020006;
 		public static final int common_signin_btn_text_pressed_dark = 0x7f020018;
 		public static final int common_signin_btn_text_focus_dark = 0x7f020013;
-		public static final int common_signin_btn_icon_focus_dark = 0x7f020007;
 		public static final int common_signin_btn_text_dark = 0x7f02000e;
+		public static final int common_signin_btn_icon_focus_dark = 0x7f020007;
 		public static final int common_signin_btn_text_disabled_light = 0x7f020012;
 		public static final int common_signin_btn_text_focus_light = 0x7f020014;
 		public static final int common_signin_btn_text_pressed_light = 0x7f020019;
