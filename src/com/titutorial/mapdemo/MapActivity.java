@@ -3,12 +3,15 @@ package com.titutorial.mapdemo;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.titutorial.mapdemo.MainActivity.LoadPlaces;
 
@@ -18,6 +21,7 @@ import android.os.Bundle;
 import android.os.DropBoxManager.Entry;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -52,10 +56,10 @@ public class MapActivity extends FragmentActivity {
 			
 			map.addMarker(new MarkerOptions().position(currentLocation).title("You are here!").icon(bitmapMarker));
 			// Move the camera instantly to currentLocation with a zoom of 15.
-			map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
+			//map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
 
 			// Zoom in, animating the camera.
-			map.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+			//map.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
 			
 		}else{
 			Log.d("error", "unable to fetch current location :(");
@@ -66,7 +70,7 @@ public class MapActivity extends FragmentActivity {
 
 	private void addMarkersToMap(
 			ArrayList<HashMap<String, String>> pList) {
-
+		LatLngBounds.Builder builder = new LatLngBounds.Builder();
 		for (int i = 0; i < pList.size(); i++) {
 			Log.d("--", "item = " + pList.get(i));
 
@@ -90,14 +94,43 @@ public class MapActivity extends FragmentActivity {
 				BitmapDescriptor bitmapMarker;
 				bitmapMarker = BitmapDescriptorFactory
 						.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
-
-				map.addMarker(new MarkerOptions().position(ll).title(pName)
+				/*
+				Marker mrkr =  map.addMarker(new MarkerOptions()
+			     .position(new LatLng(37.7750, 122.4183))
+			     .title("San Francisco")
+			     .snippet("Population: 776733"));
+				 */
+				
+				Marker m =  map.addMarker(new MarkerOptions().position(ll).title(pName)
 						.snippet(pAddress).icon(bitmapMarker));
-
+				builder.include(m.getPosition());
+				
 			} catch (Exception e) {
 				Log.d("--", "error = " + e.toString());
 			}
 		}
+
+		//add current location to map
+		if (gps.canGetLocation()) {
+			double latitude = gps.getLatitude();
+			double longitude = gps.getLongitude();
+			LatLng currentLocation = new LatLng(latitude, longitude);
+			BitmapDescriptor bitmapMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);		
+			Marker m = map.addMarker(new MarkerOptions().position(currentLocation).title("You are here!").icon(bitmapMarker));
+			builder.include(m.getPosition());
+		}else{
+			Log.d("error", "unable to fetch current location :(");
+		}
+		
+		LatLngBounds bounds = builder.build();
+		int padding = 50; // offset from edges of the map in pixels
+		Log.d("bound", "bounds = "+bounds);
+		Display mDisplay= getWindowManager().getDefaultDisplay();
+		int width= mDisplay.getWidth();
+		int Height= mDisplay.getHeight();
+		CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, Height, padding);
+		//map.moveCamera(cu);
+		map.animateCamera(cu);
 	}
 
 	@Override
