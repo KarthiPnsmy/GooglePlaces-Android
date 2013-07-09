@@ -48,6 +48,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	ListView lv;
 	Boolean useCurrentLocation = false;
 	String searchBarValue = "";
+	LazyAdapter adapter;
 	String pagetoken;
 	
 	// flag for Internet connection status
@@ -62,11 +63,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	// Progress dialog
 	ProgressDialog pDialog;
 
-	ArrayList<Place> placeList;
 	ArrayList<Place> findPlaces;
 	
 	// ListItems data
-	ArrayList<HashMap<String, String>> placesListItems;
+	ArrayList<HashMap<String, String>> placesListItems = new ArrayList<HashMap<String,String>>();
 	
 	// KEY Strings
 	public static String KEY_REFERENCE = "reference"; // id of the place
@@ -103,12 +103,25 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		slider.setOnSeekBarChangeListener(this);
 
 		// LoadMore button
-		Button btnLoadMore = new Button(this);
-		btnLoadMore.setText("Load More");
+		//Button btnLoadMore = new Button(this);
+		//btnLoadMore.setText("Load More");
 
 		// Adding Load More button to lisview at bottom
-		lv.addFooterView(btnLoadMore);
+		//lv.addFooterView(btnLoadMore);
 		
+		
+		/*
+		View view mInflater.inflate(R.layout.load_more_row, null);
+		TextView footer = (TextView) view.findViewById(R.id.loadMore);
+		lv.addFooterView(footer);
+	*/
+		
+		View footerView = getLayoutInflater().inflate(R.layout.load_more_row, null, false);
+	    //View footerView =  ((LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.load_more_row, null, false);
+	    lv.addFooterView(footerView);
+	        
+		TextView btnLoadMore = (TextView) footerView
+	            .findViewById(R.id.loadMore);
 		/**
 		 * Listening to Load More button click event
 		 * */
@@ -407,7 +420,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 
 					if (findPlaces != null) {
 						// loop through each place
-						 placesListItems = new ArrayList<HashMap<String,String>>();
+						 //placesListItems = new ArrayList<HashMap<String,String>>();
+						   Log.e("list size", "findPlaces.size: " + findPlaces.size());
 						   for (int i = 0; i < findPlaces.size(); i++) {
 							    HashMap<String, String> map = new HashMap<String, String>(); 
 							    Place placeDetail = findPlaces.get(i);
@@ -449,13 +463,20 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							}	
 						   
 							//Log.d("Result", "placesListItems = "+placesListItems);
+						   
+							// get listview current position - used to maintain scroll position
+							int currentPosition = lv.getFirstVisiblePosition();
+							
 							
 							// list adapter
-							LazyAdapter adapter = new LazyAdapter(getApplicationContext(), lv,
+							adapter = new LazyAdapter(getApplicationContext(), lv,
 									MainActivity.this, placesListItems);
 							
 							// Adding data into listview
-							lv.setAdapter(adapter);					   
+							lv.setAdapter(adapter);		
+							
+							// Setting new scroll position
+							lv.setSelectionFromTop(currentPosition + 1, 0);
 					}else{
 						Log.d("error", "findPlaces is null");
 					}

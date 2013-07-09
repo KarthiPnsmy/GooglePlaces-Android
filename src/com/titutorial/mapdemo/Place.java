@@ -1,13 +1,11 @@
 package com.titutorial.mapdemo;
 
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
 
 public class Place {
     private String id;

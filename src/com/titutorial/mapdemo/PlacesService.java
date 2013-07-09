@@ -42,18 +42,28 @@ public class PlacesService {
 	 
 	   System.out.println(json);
 	   JSONObject object = new JSONObject(json);
+	   
+       try{
+           String next_page_token = object.getString("next_page_token");
+           Log.d("next_page_token", "next_page_token = "+next_page_token);
+           
+           SharedPreferences pref = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
+           Editor editor = pref.edit();
+           editor.putString("next_page_token", next_page_token); // Storing string
+           editor.commit(); // commit changes
+           
+           SharedPreferences pref1 = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
+           String next_page_token1 = pref1.getString("next_page_token", null); // getting String
+           Log.d("next_page_token1", "next_page_token1 = "+next_page_token1);
+      }catch(JSONException e){
+    	  
+          SharedPreferences pref = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
+          Editor editor = pref.edit();
+          editor.putString("next_page_token", null); // Storing string
+          editor.commit(); // commit changes
+      	   Log.d("next_page_token", "next_page_token tag not found");
+      }
 
-       String next_page_token = object.getString("next_page_token");
-       Log.d("next_page_token", "next_page_token = "+next_page_token);
-       
-       SharedPreferences pref = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
-       Editor editor = pref.edit();
-       editor.putString("next_page_token", next_page_token); // Storing string
-       editor.commit(); // commit changes
-       
-       SharedPreferences pref1 = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
-       String next_page_token1 = pref1.getString("next_page_token", null); // getting String
-       Log.d("next_page_token1", "next_page_token1 = "+next_page_token1);
        
 	   JSONArray array = object.getJSONArray("results");
 	 
