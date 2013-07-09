@@ -71,7 +71,7 @@ public class LazyAdapter extends BaseAdapter {
 		ImageView directionBtn = (ImageView) vi.findViewById(R.id.direction); // direction
 		HashMap<String, String> place = new HashMap<String, String>();
 		place = data.get(position);
-		Log.d("place", "place item = "+place.toString());
+		//Log.d("place", "place item = "+place.toString());
 		// Setting all values in listview
 		placeReference.setText(place.get(MainActivity.KEY_REFERENCE));
 		placeName.setText(place.get(MainActivity.KEY_NAME));

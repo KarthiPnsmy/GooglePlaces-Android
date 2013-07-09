@@ -76,22 +76,22 @@ public class Place {
             try{
             	 result.setRating(pontoReferencia.getString("rating"));
             }catch(JSONException e){
-            	Log.d("rating", "rating tag not found for "+pontoReferencia.getString("name"));
+            	//Log.d("rating", "rating tag not found for "+pontoReferencia.getString("name"));
             }
            
 
 			try {
-				Log.v("tPlace1 ", "before address = " + pontoReferencia.getString("formatted_address"));
+				//Log.v("tPlace1 ", "before address = " + pontoReferencia.getString("formatted_address"));
 				result.setAddress(pontoReferencia.getString("formatted_address"));
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
-				Log.v("tPlace2 ", "before address = " + pontoReferencia.getString("vicinity"));
+				//Log.v("tPlace2 ", "before address = " + pontoReferencia.getString("vicinity"));
 				result.setAddress(pontoReferencia.getString("vicinity"));
 				//e.printStackTrace();
 			}
             
             result.setId(pontoReferencia.getString("id"));
-            Log.v("Place ", "result = " + result.toString());
+            //Log.v("Place ", "result = " + result.toString());
             return result;
         } catch (JSONException ex) {
             Logger.getLogger(Place.class.getName()).log(Level.SEVERE, null, ex);

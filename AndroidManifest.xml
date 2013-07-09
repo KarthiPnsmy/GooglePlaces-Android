@@ -6,7 +6,7 @@
 
 
     <uses-sdk
-        android:minSdkVersion="16"
+        android:minSdkVersion="10"
         android:targetSdkVersion="17" />
 
     <permission
@@ -50,17 +50,17 @@
             android:label="Map" >
         </activity>
         <!-- Mac -->
-         <!--
+       
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyB0-7gL49UspxCtlNPgJudH-7_aboghjJU" />
-        -->
+       
         <!-- Windows -->
-         
+           <!--
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyBcwwcdljLUMtE7Ilg4o4RzPrcCPBpAFZM" />
-        
+         -->
     </application>
 
 </manifest>

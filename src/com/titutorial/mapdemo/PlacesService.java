@@ -14,6 +14,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
 public class PlacesService {
@@ -29,15 +32,29 @@ public class PlacesService {
 	 }
 	 
 	 public ArrayList<Place> findPlaces(double latitude, double longitude,
-	   String placeSpacification, Double radius, Boolean useCurrentLocation, String searchBarValue) {
+	   String placeSpacification, Double radius, Boolean useCurrentLocation, String searchBarValue, String pagetoken, Context context) {
 	 
-	  String urlString = makeUrl(latitude, longitude, placeSpacification, radius, useCurrentLocation, searchBarValue);
+	  Log.d("pagetoken", "findPlaces pagetoken = "+pagetoken);
+	  String urlString = makeUrl(latitude, longitude, placeSpacification, radius, useCurrentLocation, searchBarValue, pagetoken);
 	 
 	  try {
 	   String json = getJSON(urlString);
 	 
 	   System.out.println(json);
 	   JSONObject object = new JSONObject(json);
+
+       String next_page_token = object.getString("next_page_token");
+       Log.d("next_page_token", "next_page_token = "+next_page_token);
+       
+       SharedPreferences pref = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
+       Editor editor = pref.edit();
+       editor.putString("next_page_token", next_page_token); // Storing string
+       editor.commit(); // commit changes
+       
+       SharedPreferences pref1 = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
+       String next_page_token1 = pref1.getString("next_page_token", null); // getting String
+       Log.d("next_page_token1", "next_page_token1 = "+next_page_token1);
+       
 	   JSONArray array = object.getJSONArray("results");
 	 
 	   ArrayList<Place> arrayList = new ArrayList<Place>();
@@ -45,7 +62,7 @@ public class PlacesService {
 	    try {
 	     Place place = Place
 	       .jsonToPontoReferencia((JSONObject) array.get(i));
-	     Log.v("Places Services ", "Place Obj = " + place);
+	    // Log.v("Places Services ", "Place Obj = " + place);
 	     arrayList.add(place);
 	    } catch (Exception e) {
 	    }
@@ -59,7 +76,7 @@ public class PlacesService {
 	 }
 	 
 	 // https://maps.googleapis.com/maps/api/place/search/json?location=28.632808,77.218276&radius=500&types=atm&sensor=false&key=apikey
-	 private String makeUrl(double latitude, double longitude, String place, Double radius, Boolean useCurrentLocation, String searchBarValue) {
+	 private String makeUrl(double latitude, double longitude, String place, Double radius, Boolean useCurrentLocation, String searchBarValue, String pagetoken) {
 	  StringBuilder urlString;
 	  
 	  Log.d("url", "useCurrentLocation = "+useCurrentLocation);
@@ -92,6 +109,10 @@ public class PlacesService {
 			urlString.append("&types=" + place);
 			//urlString.append("&rankby=distance");
 			urlString.append("&sensor=false&key=" + API_KEY);
+		}
+		
+		if(pagetoken != null && pagetoken!= ""){
+			urlString.append("&pagetoken=" + pagetoken);
 		}
 	  Log.d("urlString ", "urlString = "+urlString);
 	  return urlString.toString();

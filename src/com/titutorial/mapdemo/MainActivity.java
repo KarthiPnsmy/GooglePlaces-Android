@@ -9,11 +9,12 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.text.Html;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -24,23 +25,15 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.SimpleAdapter;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.titutorial.mapdemo.helper.AlertDialogManager;
 import com.titutorial.mapdemo.helper.ConnectionDetector;
-import com.titutorial.mapdemo.MainActivity.LoadPlaces;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+
 
 public class MainActivity extends FragmentActivity implements OnClickListener,OnSeekBarChangeListener {
 	private static final int earthRadius = 6371;
@@ -55,6 +48,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	ListView lv;
 	Boolean useCurrentLocation = false;
 	String searchBarValue = "";
+	String pagetoken;
 	
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
@@ -89,6 +83,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	
 	protected ArrayList<CharSequence> selectedTypes = new ArrayList<CharSequence>();
 
+	// Flag for current page
+	int current_page = 0;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -104,6 +101,25 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		currentLocation.setOnClickListener(this);
 		typesValue.setOnClickListener(this);
 		slider.setOnSeekBarChangeListener(this);
+
+		// LoadMore button
+		Button btnLoadMore = new Button(this);
+		btnLoadMore.setText("Load More");
+
+		// Adding Load More button to lisview at bottom
+		lv.addFooterView(btnLoadMore);
+		
+		/**
+		 * Listening to Load More button click event
+		 * */
+		btnLoadMore.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				// Starting a new async task
+				new LoadPlaces().execute();
+			}
+		});
 		
 		searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 					@Override
@@ -135,6 +151,15 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		});
 	}
 
+	@Override
+	public void onDestroy() {
+	   super.onDestroy();
+       SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+       Editor editor = pref.edit();
+       editor.clear();
+       editor.commit();
+	}
+	 
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
@@ -293,7 +318,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
         float d = earthRadius * c;
         
         double finalValue = Math.round( d * 100.0 ) / 100.0;
-        Log.d("distance", "finalValue = "+finalValue+" KM");
+        //Log.d("distance", "finalValue = "+finalValue+" KM");
         
         return finalValue;
     }
@@ -321,9 +346,11 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		 * */
 		protected String doInBackground(String... args) {
 			
-			PlacesService service = new PlacesService("AIzaSyCRLa4LQZWNQBcjCYcIVYA45i9i8zfClqc");
+			PlacesService service = new PlacesService("AIzaSyDXwZXOcTmSY67VLgL9A3ycolOjVm-5COY");
 			
 			try {
+				
+
 				// Separeate your place types by PIPE symbol "|"
 				// If you want all types places make it as null
 				// Check list of types supported by google
@@ -335,29 +362,27 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 				}else{
 					types = stringBuilder.toString();
 				}
-				
+
+				 Log.d("current_page", "current_page = "+current_page);
+				 if(current_page>0){
+				       SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+				       pagetoken = pref.getString("next_page_token", null); // getting String
+				       Log.d("pagetoken", "pagetoken = "+pagetoken);
+				 }
+
 				// Radius in meters - increase this value if you don't find any places
 				//double radius = 1000; // 1000 meters
 				double radius = radiusValue*1000; // rdius in meters 
-				Log.d("search", "radius = "+radius);
-				Log.d("search", "types1 "+types);
 				types = types.toLowerCase(Locale.ENGLISH);
-				Log.d("search", "types2 "+types);
 				types = types.replace(", ", "|");
-				Log.d("search", "types3 "+types);
 				types = types.replace(" ", "_");
-				Log.d("search", "types4 "+types);
-				Log.d("placs", "latitude - "+gps.getLatitude()+", longitude = "+gps.getLongitude());
 
 				 findPlaces = service.findPlaces(gps.getLatitude(), 
-						  gps.getLongitude(), types, radius, useCurrentLocation, searchBarValue);
-						 
-						 
-						   for (int i = 0; i < findPlaces.size(); i++) {
-						 
-						    Place placeDetail = findPlaces.get(i);
-						    Log.e("placesL", "places : " + placeDetail.getName());
-						   }				
+						  gps.getLongitude(), types, radius, useCurrentLocation, searchBarValue, pagetoken, getApplicationContext());
+				 
+				// increment current page
+				current_page += 1;		 
+						 			
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -386,7 +411,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 						   for (int i = 0; i < findPlaces.size(); i++) {
 							    HashMap<String, String> map = new HashMap<String, String>(); 
 							    Place placeDetail = findPlaces.get(i);
-							    Log.e("placesL", "places : " + placeDetail.getName());
+							    //Log.e("placesL", "places : " + placeDetail.getName());
 								// Place reference is used to get "place full details"
 								map.put(KEY_REFERENCE, placeDetail.getId());
 								
@@ -408,7 +433,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 
 									distance = locationA.distanceTo(locationB);
 								}else{
-									Log.d("Distance", "no distance calculation ");
+									//Log.d("Distance", "no distance calculation ");
 								}
 								
 								// Place address
@@ -423,7 +448,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								placesListItems.add(map);
 							}	
 						   
-							Log.d("Result", "placesListItems = "+placesListItems);
+							//Log.d("Result", "placesListItems = "+placesListItems);
 							
 							// list adapter
 							LazyAdapter adapter = new LazyAdapter(getApplicationContext(), lv,
