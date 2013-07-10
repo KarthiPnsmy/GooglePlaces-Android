@@ -59,7 +59,7 @@ public class PlacesService {
     	  
           SharedPreferences pref = context.getSharedPreferences("MyPref", 0); // 0 - for private mode
           Editor editor = pref.edit();
-          editor.putString("next_page_token", null); // Storing string
+          editor.putString("next_page_token", "empty"); // Storing string
           editor.commit(); // commit changes
       	   Log.d("next_page_token", "next_page_token tag not found");
       }

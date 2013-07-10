@@ -50,7 +50,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	String searchBarValue = "";
 	LazyAdapter adapter;
 	String pagetoken;
-	
+	TextView btnLoadMore;
+	Boolean isLoadMoreClicked = false;
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
 
@@ -103,24 +104,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		slider.setOnSeekBarChangeListener(this);
 
 		// LoadMore button
-		//Button btnLoadMore = new Button(this);
-		//btnLoadMore.setText("Load More");
-
-		// Adding Load More button to lisview at bottom
-		//lv.addFooterView(btnLoadMore);
-		
-		
-		/*
-		View view mInflater.inflate(R.layout.load_more_row, null);
-		TextView footer = (TextView) view.findViewById(R.id.loadMore);
-		lv.addFooterView(footer);
-	*/
 		
 		View footerView = getLayoutInflater().inflate(R.layout.load_more_row, null, false);
 	    //View footerView =  ((LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.load_more_row, null, false);
 	    lv.addFooterView(footerView);
 	        
-		TextView btnLoadMore = (TextView) footerView
+		btnLoadMore = (TextView) footerView
 	            .findViewById(R.id.loadMore);
 		/**
 		 * Listening to Load More button click event
@@ -130,6 +119,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 			@Override
 			public void onClick(View arg0) {
 				// Starting a new async task
+				isLoadMoreClicked = true;
 				new LoadPlaces().execute();
 			}
 		});
@@ -153,6 +143,17 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							Log.d("search",	"search btn clikec - "+ searchBar.getText());
 							useCurrentLocation = false;
 							searchBarValue = searchBar.getText().toString();
+							
+							//reset page token and list
+					        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+					        Editor editor = pref.edit();
+					        editor.clear();
+					        editor.commit();
+					        
+					        placesListItems = new ArrayList<HashMap<String,String>>();
+					        btnLoadMore.setVisibility(View.VISIBLE);
+					        isLoadMoreClicked = false;
+					       
 							new LoadPlaces().execute();
 							
 							//hide keyboard
@@ -184,6 +185,17 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 				double latitude = gps.getLatitude();
 				double longitude = gps.getLongitude();
 				useCurrentLocation = true;
+				
+				//reset page token and list
+		        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+		        Editor editor = pref.edit();
+		        editor.clear();
+		        editor.commit();
+		        
+		        placesListItems = new ArrayList<HashMap<String,String>>();
+		        btnLoadMore.setVisibility(View.VISIBLE);
+		        isLoadMoreClicked = false;
+		        
 				//call search function
 				new LoadPlaces().execute();
 				hideKeyboard();
@@ -381,6 +393,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 				       SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
 				       pagetoken = pref.getString("next_page_token", null); // getting String
 				       Log.d("pagetoken", "pagetoken = "+pagetoken);
+				       
 				 }
 
 				// Radius in meters - increase this value if you don't find any places
@@ -390,8 +403,14 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 				types = types.replace(", ", "|");
 				types = types.replace(" ", "_");
 
-				 findPlaces = service.findPlaces(gps.getLatitude(), 
-						  gps.getLongitude(), types, radius, useCurrentLocation, searchBarValue, pagetoken, getApplicationContext());
+			       if(pagetoken == "empty"){
+			    	   //btnLoadMore.setVisibility(View.GONE);
+			    	   Log.d("btnLoadMore ", "btnLoadMore hiding, pagetoken = "+pagetoken);
+			       }else {
+						 findPlaces = service.findPlaces(gps.getLatitude(), 
+								  gps.getLongitude(), types, radius, useCurrentLocation, searchBarValue, pagetoken, getApplicationContext());
+			       }
+
 				 
 				// increment current page
 				current_page += 1;		 
@@ -419,6 +438,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 					
 
 					if (findPlaces != null) {
+						
+						if(pagetoken == "empty"){
+							Log.e("pagetoken", "in runOnUiThread .pagetoken  = " +pagetoken);
+							btnLoadMore.setVisibility(View.GONE);
+							Toast.makeText(getApplicationContext(), "No more data found", Toast.LENGTH_SHORT).show();
+						}else{
 						// loop through each place
 						 //placesListItems = new ArrayList<HashMap<String,String>>();
 						   Log.e("list size", "findPlaces.size: " + findPlaces.size());
@@ -475,8 +500,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							// Adding data into listview
 							lv.setAdapter(adapter);		
 							
-							// Setting new scroll position
-							lv.setSelectionFromTop(currentPosition + 1, 0);
+							if(isLoadMoreClicked){
+								// Setting new scroll position
+								lv.setSelectionFromTop(currentPosition + 1, 0);
+							}
+
+						}
 					}else{
 						Log.d("error", "findPlaces is null");
 					}
