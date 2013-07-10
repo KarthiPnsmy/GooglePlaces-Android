@@ -54,7 +54,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
 
-	// Connection detector class
+	// Connection detector 
 	ConnectionDetector cd;
 	
 	// Alert Dialog Manager
