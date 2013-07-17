@@ -74,6 +74,7 @@ public class Place {
             try{
             	 result.setRating(pontoReferencia.getString("rating"));
             }catch(JSONException e){
+            	result.setRating("0");
             	//Log.d("rating", "rating tag not found for "+pontoReferencia.getString("name"));
             }
            

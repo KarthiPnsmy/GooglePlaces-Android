@@ -1,10 +1,14 @@
 package com.titutorial.mapdemo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -24,12 +28,15 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +44,7 @@ import com.titutorial.mapdemo.helper.AlertDialogManager;
 import com.titutorial.mapdemo.helper.ConnectionDetector;
 
 
-public class MainActivity extends FragmentActivity implements OnClickListener,OnSeekBarChangeListener {
+public class MainActivity extends FragmentActivity implements OnClickListener,OnSeekBarChangeListener, OnNavigationListener {
 	private static final int earthRadius = 6371;
 	Button typesValue;
 	Button currentLocation;
@@ -54,6 +61,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	String pagetoken;
 	TextView btnLoadMore;
 	Boolean isLoadMoreClicked = false;
+	String[] dropdownValues;
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
 
@@ -89,16 +97,22 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	// Flag for current page
 	int current_page = 0;
 	
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		final ActionBar actionBar = getActionBar();
-		final String[] dropdownValues = getResources().getStringArray(R.array.planets_array);
+		// setup action bar for spinner
+	    ActionBar bar = getActionBar();
+	    bar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+	   
+
+		dropdownValues = getResources().getStringArray(R.array.sortby_array);
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-		        R.array.planets_array, android.R.layout.simple_spinner_item);
+		        R.array.sortby_array, android.R.layout.simple_spinner_item);
 		// Specify the layout to use when the list of choices appears
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		bar.setListNavigationCallbacks(adapter, this);
 		
 
 		
@@ -128,7 +142,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		 * */
 		btnLoadMore.setOnClickListener(new View.OnClickListener() {
 
-			@Override
 			public void onClick(View arg0) {
 				// Starting a new async task
 				isLoadMoreClicked = true;
@@ -137,7 +150,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		});
 		
 		searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-					@Override
 					public boolean onEditorAction(TextView v, int actionId,
 							KeyEvent event) {
 						if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -186,7 +198,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
        editor.commit();
 	}
 	 
-	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
 		case R.id.currentLocation:
@@ -289,7 +300,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 			checkedColours[i] = selectedTypes.contains(placeTypes[i]);
 
 		DialogInterface.OnMultiChoiceClickListener coloursDialogListener = new DialogInterface.OnMultiChoiceClickListener() {
-			@Override
 			public void onClick(DialogInterface dialog, int which,
 					boolean isChecked) {
 				if (isChecked)
@@ -316,7 +326,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		dialog.show();
 	}
 
-	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 		// TODO Auto-generated method stub
 		radiusValue = progress;
@@ -325,14 +334,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		
 	}
 
-	@Override
 	public void onStartTrackingTouch(SeekBar seekBar) {
 		// TODO Auto-generated method stub
 		Log.d("seek",  "onStartTrackingTouch Seekbar");
 		
 	}
 
-	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 		// TODO Auto-generated method stub
 		Log.d("seek",  "onStopTrackingTouch Seekbar");
@@ -368,7 +375,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		/**
 		 * Before starting background thread Show Progress Dialog
 		 * */
-		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
 			pDialog = new ProgressDialog(MainActivity.this);
@@ -494,7 +500,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								// Place longitude
 								map.put(KEY_LONGITUDE, placeDetail.getLongitude().toString());
 								// Distance from current location
-								map.put(KEY_DISTANCE, calculateDistance(gps.getLatitude(),gps.getLongitude(),placeDetail.getLatitude(),placeDetail.getLongitude() )+" KM");
+								map.put(KEY_DISTANCE, calculateDistance(gps.getLatitude(),gps.getLongitude(),placeDetail.getLatitude(),placeDetail.getLongitude() )+"");
 								// adding HashMap to ArrayList
 								placesListItems.add(map);
 							}	
@@ -528,6 +534,61 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 
 		}
 
+	}
+
+
+	public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+		// TODO Auto-generated method stub
+		String selectedItem = dropdownValues[itemPosition];
+		Log.d("@@## ", "itemPosition = "+itemPosition+", itemId = "+itemId+" item is = "+selectedItem);
+		Log.d("@@## ", "before placesListItems = "+placesListItems);
+
+		if(selectedItem.equalsIgnoreCase("rating")){
+			Log.d("@@## ", "inside  rating ");
+		    Collections.sort(placesListItems, new Comparator<HashMap< String,String >>() {
+
+		        public int compare(HashMap<String, String> lhs,
+		                HashMap<String, String> rhs) {
+
+		            Double firstValue = new Double(lhs.get(KEY_RATING));
+		            Double secondValue = new Double(rhs.get(KEY_RATING));
+		            return firstValue.compareTo(secondValue);
+		        }
+		    });
+		}else if(selectedItem.equalsIgnoreCase("distance")){
+			Log.d("@@## ", "inside  distance ");
+		    Collections.sort(placesListItems, new Comparator<HashMap< String,String >>() {
+
+		        public int compare(HashMap<String, String> lhs,
+		                HashMap<String, String> rhs) {
+
+		            Double firstValue = new Double(lhs.get(KEY_DISTANCE));
+		            Double secondValue = new Double(rhs.get(KEY_DISTANCE));
+		            return firstValue.compareTo(secondValue);
+		        }
+		    });	
+		}else{
+			Log.d("@@## ", "inside  Name ");
+		    Collections.sort(placesListItems, new Comparator<HashMap< String,String >>() {
+
+		        public int compare(HashMap<String, String> lhs,
+		                HashMap<String, String> rhs) {
+
+		            String firstValue = lhs.get(KEY_NAME);
+		            String secondValue = rhs.get(KEY_NAME);
+		            return firstValue.compareToIgnoreCase(secondValue);
+		        }
+		    });
+		}
+	    Log.d("@@## ", "after placesListItems = "+placesListItems);
+
+		adapter = new LazyAdapter(getApplicationContext(), lv,
+				MainActivity.this, placesListItems);
+		
+		// Adding data into listview
+		lv.setAdapter(adapter);		
+	    
+		return false;
 	}
 
 }

@@ -86,12 +86,11 @@ public class LazyAdapter extends BaseAdapter {
 		placeAddress.setText(place.get(MainActivity.KEY_ADDRESS));
 		placeLatitude.setText(place.get(MainActivity.KEY_LATITUDE));
 		placeLongitude.setText(place.get(MainActivity.KEY_LONGITUDE));
-		distance.setText(place.get(MainActivity.KEY_DISTANCE));
+		distance.setText(place.get(MainActivity.KEY_DISTANCE)+" KM");
 		
 		
 		directionBtn.setOnClickListener(new OnClickListener() {
 
-			@Override
 			public void onClick(View v) {
 				final int position = clv.getPositionForView((View) v
 						.getParent());

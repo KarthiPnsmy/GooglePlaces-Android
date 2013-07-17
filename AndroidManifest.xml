@@ -6,7 +6,7 @@
 
 
     <uses-sdk
-        android:minSdkVersion="10"
+        android:minSdkVersion="11"
         android:targetSdkVersion="17" />
 
     <permission
@@ -33,7 +33,7 @@
         android:debuggable="true" 
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@android:style/Theme.Holo.Light" >
         <activity
             android:name="com.titutorial.mapdemo.MainActivity"
             android:configChanges="orientation|screenSize"

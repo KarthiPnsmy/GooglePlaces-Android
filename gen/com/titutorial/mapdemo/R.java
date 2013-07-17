@@ -9,7 +9,7 @@ package com.titutorial.mapdemo;
 
 public final class R {
     public static final class array {
-        public static final int planets_array=0x7f080000;
+        public static final int sortby_array=0x7f080000;
     }
     public static final class attr {
         /** <p>Must be a floating point value, such as "<code>1.2</code>".
