@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="sortby_array">
+        <item>Filter By</item>
         <item>Distance</item>
         <item>Name</item>
         <item>Rating</item>

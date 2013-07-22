@@ -59,9 +59,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	String searchBarValue = "";
 	LazyAdapter adapter;
 	String pagetoken;
+	View defaultText;
+	View footerView;
 	TextView btnLoadMore;
 	Boolean isLoadMoreClicked = false;
 	String[] dropdownValues;
+	ActionBar bar;
 	// flag for Internet connection status
 	Boolean isInternetPresent = false;
 
@@ -103,7 +106,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		super.onCreate(savedInstanceState);
 		
 		// setup action bar for spinner
-	    ActionBar bar = getActionBar();
+	    bar = getActionBar();
 	    bar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 	   
 
@@ -130,10 +133,11 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		slider.setOnSeekBarChangeListener(this);
 
 		// LoadMore button
-		
-		View footerView = getLayoutInflater().inflate(R.layout.load_more_row, null, false);
+		defaultText = (TextView) findViewById(R.id.defaultText);
+		footerView = getLayoutInflater().inflate(R.layout.load_more_row, null, false);
 	    //View footerView =  ((LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.load_more_row, null, false);
 	    lv.addFooterView(footerView);
+	    footerView.setVisibility(View.GONE);
 	        
 		btnLoadMore = (TextView) footerView
 	            .findViewById(R.id.loadMore);
@@ -162,9 +166,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								// Internet Connection is not present
 								alert.showAlertDialog(MainActivity.this, "Internet Connection Error",
 										"Please connect to working Internet connection", false);
+								return false;
 							}
 							
-							Log.d("search",	"search btn clikec - "+ searchBar.getText());
 							useCurrentLocation = false;
 							searchBarValue = searchBar.getText().toString();
 							
@@ -201,38 +205,50 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 	public void onClick(View view) {
 		switch (view.getId()) {
 		case R.id.currentLocation:
-			gps = new GPSTracker(MainActivity.this);
-			// check if GPS enabled
-			if (gps.canGetLocation()) {
+			cd = new ConnectionDetector(getApplicationContext());
 
-				double latitude = gps.getLatitude();
-				double longitude = gps.getLongitude();
-				useCurrentLocation = true;
-				
-				//reset page token and list
-		        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
-		        Editor editor = pref.edit();
-		        editor.clear();
-		        editor.commit();
-		        
-		        placesListItems = new ArrayList<HashMap<String,String>>();
-		        btnLoadMore.setVisibility(View.VISIBLE);
-		        isLoadMoreClicked = false;
-		        
-				//call search function
-				new LoadPlaces().execute();
-				hideKeyboard();
-				// \n is for new line
-				Toast.makeText(
-						getApplicationContext(),
-						"Your Location is - \nLat: " + latitude + "\nLong: "
-								+ longitude, Toast.LENGTH_LONG).show();
-			} else {
-				// can't get location
-				// GPS or Network is not enabled
-				// Ask user to enable GPS/network in settings
-				gps.showSettingsAlert();
+			// Check if Internet present
+			isInternetPresent = cd.isConnectingToInternet();
+			if (!isInternetPresent) {
+				// Internet Connection is not present
+				alert.showAlertDialog(MainActivity.this, "Internet Connection Error",
+						"Please connect to working Internet connection", false);
+			}else{
+				gps = new GPSTracker(MainActivity.this);
+				// check if GPS enabled
+				if (gps.canGetLocation()) {
+
+					double latitude = gps.getLatitude();
+					double longitude = gps.getLongitude();
+					useCurrentLocation = true;
+					
+					//reset page token and list
+			        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+			        Editor editor = pref.edit();
+			        editor.clear();
+			        editor.commit();
+			        
+			        placesListItems = new ArrayList<HashMap<String,String>>();
+			        btnLoadMore.setVisibility(View.VISIBLE);
+			        isLoadMoreClicked = false;
+			        
+					//call search function
+					new LoadPlaces().execute();
+					hideKeyboard();
+					// \n is for new line
+					Toast.makeText(
+							getApplicationContext(),
+							"Your Location is - \nLat: " + latitude + "\nLong: "
+									+ longitude, Toast.LENGTH_LONG).show();
+				} else {
+					// can't get location
+					// GPS or Network is not enabled
+					// Ask user to enable GPS/network in settings
+					gps.showSettingsAlert();
+				}
 			}
+			
+
 			break;
 
 		case R.id.typesValue:
@@ -458,7 +474,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 					if (findPlaces != null) {
 						
 						if(pagetoken == "empty"){
-							Log.e("pagetoken", "in runOnUiThread .pagetoken  = " +pagetoken);
+							Log.e("pagetoken", "pagetoken  = " +pagetoken);
 							btnLoadMore.setVisibility(View.GONE);
 							Toast.makeText(getApplicationContext(), "No more data found", Toast.LENGTH_SHORT).show();
 						}else{
@@ -468,7 +484,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 						   for (int i = 0; i < findPlaces.size(); i++) {
 							    HashMap<String, String> map = new HashMap<String, String>(); 
 							    Place placeDetail = findPlaces.get(i);
-							    //Log.e("placesL", "places : " + placeDetail.getName());
 								// Place reference is used to get "place full details"
 								map.put(KEY_REFERENCE, placeDetail.getId());
 								
@@ -505,8 +520,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 								placesListItems.add(map);
 							}	
 						   
-							//Log.d("Result", "placesListItems = "+placesListItems);
-						   
 							// get listview current position - used to maintain scroll position
 							int currentPosition = lv.getFirstVisiblePosition();
 							
@@ -514,10 +527,18 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 							// list adapter
 							adapter = new LazyAdapter(getApplicationContext(), lv,
 									MainActivity.this, placesListItems);
-							
+							defaultText.setVisibility(View.GONE);
 							// Adding data into listview
-							lv.setAdapter(adapter);		
+							lv.setAdapter(adapter);	
+							bar.setSelectedNavigationItem(0);
 							
+							//Footerview make visible
+							if(findPlaces.size() > 0){
+								footerView.setVisibility(View.VISIBLE);
+							}else{
+								defaultText.setVisibility(View.VISIBLE);
+								footerView.setVisibility(View.GONE);
+							}
 							if(isLoadMoreClicked){
 								// Setting new scroll position
 								lv.setSelectionFromTop(currentPosition + 1, 0);
@@ -526,6 +547,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 						}
 					}else{
 						Log.d("error", "findPlaces is null");
+						defaultText.setVisibility(View.VISIBLE);
+						footerView.setVisibility(View.GONE);
 					}
 						   
 				}
@@ -555,6 +578,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 		            return firstValue.compareTo(secondValue);
 		        }
 		    });
+		    
 		}else if(selectedItem.equalsIgnoreCase("distance")){
 			Log.d("@@## ", "inside  distance ");
 		    Collections.sort(placesListItems, new Comparator<HashMap< String,String >>() {

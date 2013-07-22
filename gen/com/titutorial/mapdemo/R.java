@@ -197,6 +197,7 @@ containing a value of this type.
     public static final class id {
         public static final int address=0x7f05000b;
         public static final int currentLocation=0x7f050011;
+        public static final int defaultText=0x7f050016;
         public static final int direction=0x7f05000e;
         public static final int distance=0x7f05000d;
         public static final int distanceLabel=0x7f050014;
@@ -204,11 +205,11 @@ containing a value of this type.
         public static final int hybrid=0x7f050004;
         public static final int itemLat=0x7f050008;
         public static final int itemLong=0x7f050009;
-        public static final int list=0x7f050016;
-        public static final int list_view=0x7f050018;
+        public static final int list=0x7f050017;
+        public static final int list_view=0x7f050019;
         public static final int loadMore=0x7f05000f;
         public static final int map=0x7f050006;
-        public static final int map_view=0x7f050017;
+        public static final int map_view=0x7f050018;
         public static final int name=0x7f05000a;
         public static final int none=0x7f050000;
         public static final int normal=0x7f050001;
