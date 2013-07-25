@@ -27,8 +27,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 public class MapActivity extends FragmentActivity {
-	static final LatLng currentLocation = new LatLng(11.21951, 78.167799);
-	static final LatLng KPALAYAM = new LatLng(11.2818, 78.1648);
 	GoogleMap map;
 	GPSTracker gps;
 
@@ -54,13 +52,7 @@ public class MapActivity extends FragmentActivity {
 			LatLng currentLocation = new LatLng(latitude, longitude);
 			BitmapDescriptor bitmapMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
 			
-			map.addMarker(new MarkerOptions().position(currentLocation).title("You are here!").icon(bitmapMarker));
-			// Move the camera instantly to currentLocation with a zoom of 15.
-			//map.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 17));
-
-			// Zoom in, animating the camera.
-			//map.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-			
+			map.addMarker(new MarkerOptions().position(currentLocation).title("You are here!").icon(bitmapMarker));			
 		}else{
 			Log.d("error", "unable to fetch current location :(");
 		}
@@ -80,26 +72,16 @@ public class MapActivity extends FragmentActivity {
 			HashMap<String, String> itm4 = pList.get(i);
 			try {
 				String pName = itm1.get(MainActivity.KEY_NAME);
-				Log.d("--", "pName = " + pName);
 				Double pLatitude = Double.parseDouble(itm2
 						.get(MainActivity.KEY_LATITUDE));
-				Log.d("--", "pLatitude = " + pLatitude);
 				Double pLongitude = Double.parseDouble(itm3
 						.get(MainActivity.KEY_LONGITUDE));
-				Log.d("--", "pLongitude = " + pLongitude);
 				String pAddress = itm4.get(MainActivity.KEY_ADDRESS);
-				Log.d("--", "pName = " + pName);
 				
 				LatLng ll = new LatLng(pLatitude, pLongitude);
 				BitmapDescriptor bitmapMarker;
 				bitmapMarker = BitmapDescriptorFactory
 						.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
-				/*
-				Marker mrkr =  map.addMarker(new MarkerOptions()
-			     .position(new LatLng(37.7750, 122.4183))
-			     .title("San Francisco")
-			     .snippet("Population: 776733"));
-				 */
 				
 				Marker m =  map.addMarker(new MarkerOptions().position(ll).title(pName)
 						.snippet(pAddress).icon(bitmapMarker));

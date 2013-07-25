@@ -28,15 +28,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -575,7 +572,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 
 		            Double firstValue = new Double(lhs.get(KEY_RATING));
 		            Double secondValue = new Double(rhs.get(KEY_RATING));
-		            return firstValue.compareTo(secondValue);
+		            return secondValue.compareTo(firstValue);
 		        }
 		    });
 		    
@@ -583,7 +580,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener,On
 			Log.d("@@## ", "inside  distance ");
 		    Collections.sort(placesListItems, new Comparator<HashMap< String,String >>() {
 
-		        public int compare(HashMap<String, String> lhs,
+		        @SuppressLint("UseValueOf")
+				public int compare(HashMap<String, String> lhs,
 		                HashMap<String, String> rhs) {
 
 		            Double firstValue = new Double(lhs.get(KEY_DISTANCE));
